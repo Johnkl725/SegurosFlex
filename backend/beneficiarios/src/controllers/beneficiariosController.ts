@@ -28,7 +28,7 @@ export const createBeneficiario: RequestHandler = async (req: Request, res: Resp
         }
         const { Nombre, Apellido, Email, Telefono } = req.body;
         await pool.query(
-            'INSERT INTO Beneficiarios (Nombre, Apellido, Email, Telefono) VALUES (@Nombre, @Apellido, @Email, @Telefono)',
+            'INSERT INTO beneficiario (Nombre, Apellido, Email, Telefono) VALUES (@Nombre, @Apellido, @Email, @Telefono)',
             {
                 Nombre,
                 Apellido,

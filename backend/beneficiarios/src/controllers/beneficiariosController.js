@@ -39,7 +39,7 @@ const createBeneficiario = (req, res) => __awaiter(void 0, void 0, void 0, funct
             return;
         }
         const { Nombre, Apellido, Email, Telefono } = req.body;
-        yield db_1.default.query('INSERT INTO Beneficiarios (Nombre, Apellido, Email, Telefono) VALUES (@Nombre, @Apellido, @Email, @Telefono)', {
+        yield db_1.default.query('INSERT INTO beneficiario (Nombre, Apellido, Email, Telefono) VALUES (@Nombre, @Apellido, @Email, @Telefono)', {
             Nombre,
             Apellido,
             Email,

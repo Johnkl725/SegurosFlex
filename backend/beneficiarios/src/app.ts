@@ -1,7 +1,8 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import beneficiariosRoutes from './routes/beneficiariosRoutes';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import siniestrosRoutes from "./routes/siniestrosRoutes";
+import beneficiariosRoutes from "./routes/beneficiariosRoutes";
 
 // Configurar variables de entorno
 dotenv.config();
@@ -14,13 +15,35 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
-app.use('/api/beneficiarios', beneficiariosRoutes);
+// Registrar rutas
+app.use("/api/beneficiarios", beneficiariosRoutes);
+app.use("/api/siniestros", siniestrosRoutes);
 
-// Middleware de manejo de errores
+// Imprimir rutas registradas en el servidor
+console.log("Rutas registradas en el servidor:");
+const getRoutes = (layer: any, basePath = "") => {
+  if (layer.route) {
+    // Ruta directa
+    console.log(`- ${basePath}${layer.route.path}`);
+  } else if (layer.name === "router" && layer.handle.stack) {
+    // Subrutas dentro de un router
+    layer.handle.stack.forEach((subLayer: any) => {
+      getRoutes(subLayer, basePath + (layer.regexp.source.replace("\\/", "/").replace("^", "").replace("?$", "")));
+    });
+  }
+};
+
+app._router.stack.forEach((middleware: any) => {
+  getRoutes(middleware);
+});
+
+
+// Middleware de manejo de errores global
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Error interno del servidor' });
+  console.error("Middleware de error global:", err.stack);
+  res.status(500).json({ error: "Error interno del servidor" });
 });
 
 export default app;
+
+
