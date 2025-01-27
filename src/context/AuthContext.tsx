@@ -3,11 +3,11 @@ import apiClient from '../services/apiClient';
 
 interface AuthResponse {
   // token: string;
-  user: { UsuarioID: number; Nombre: string; Apellido: string; Email: string; Rol: 'Personal' | 'Administrador' | 'Beneficiario' };
+  user: { UsuarioID: number; Nombre: string; Apellido: string; Email: string; Rol: 'Personal' | 'Administrador' | 'General' };
 }
 
 interface AuthContextType {
-  user: { UsuarioID: number; Nombre: string; Apellido: string; Email: string; Rol: 'Personal' | 'Administrador' | 'Beneficiario' } | null;
+  user: { UsuarioID: number; Nombre: string; Apellido: string; Email: string; Rol: 'Personal' | 'Administrador' | 'General' } | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
-    // localStorage.removeItem('token');
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);

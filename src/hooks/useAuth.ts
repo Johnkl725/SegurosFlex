@@ -8,7 +8,7 @@ interface AuthResponse {
     Nombre: string;
     Apellido: string;
     Email: string;
-    Rol: 'Personal' | 'Administrador' | 'Beneficiario';
+    Rol: 'Personal' | 'Administrador' | 'General';
   };
 }
 
@@ -32,7 +32,7 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    // localStorage.removeItem('token');
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
   };
