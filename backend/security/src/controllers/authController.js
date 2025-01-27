@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const jwt_1 = require("../utils/jwt");
+//import { generateToken } from '../utils/jwt'; 
 const userModel_1 = require("../models/userModel");
 // Registro de usuario
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -46,11 +46,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return;
         }
         // Generar token JWT para la sesión del usuario
-        const token = (0, jwt_1.generateToken)({ UsuarioID: user.UsuarioID, Rol: user.Rol });
+        //const token = generateToken({ UsuarioID: user.UsuarioID, Rol: user.Rol });
         // Responder con éxito y enviar el token junto con los datos del usuario
         res.status(200).json({
             message: 'Inicio de sesión exitoso',
-            token,
             user: {
                 UsuarioID: user.UsuarioID,
                 Nombre: user.Nombre,

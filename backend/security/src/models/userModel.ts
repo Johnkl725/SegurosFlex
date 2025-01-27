@@ -1,5 +1,5 @@
 import pool from '../config/db';
-import { RowDataPacket } from 'mysql2/promise';
+import sql from 'mssql';
 
 // Definimos la interfaz para el usuario
 export interface User {
@@ -11,17 +11,17 @@ export interface User {
   Rol: 'Personal' | 'Administrador' | 'Beneficiario';
 }
 
-// Función para llamar al procedimiento almacenado
+// Función para llamar al procedimiento almacenado y buscar usuario por email
 export const findUserByEmail = async (email: string): Promise<User | null> => {
   try {
-    const [rows] = await pool.query<(User & RowDataPacket)[]>(
-      'CALL sp_FindUserByEmail(?)', 
-      [email]
-    );
+    const poolConnection = await pool;
+    const result = await poolConnection
+      .request()
+      .input('Email', sql.VarChar, email)
+      .execute('sp_FindUserByEmail');
 
-    // En MySQL, los procedimientos almacenados devuelven un array de arrays, por lo que accedemos a `rows[0]`
-    if (rows.length > 0 && rows[0].length > 0) {
-      return rows[0][0]; // Retorna el primer usuario encontrado
+    if (result.recordset.length > 0) {
+      return result.recordset[0] as User;
     }
     return null;
   } catch (error) {
@@ -29,14 +29,21 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
     throw new Error('Error en la base de datos');
   }
 };
+
+// Función para llamar al procedimiento almacenado y crear un usuario
 export const createUser = async (user: User): Promise<void> => {
   try {
-    await pool.query(
-      'CALL sp_CreateUser(?, ?, ?, ?, ?)',
-      [user.Nombre, user.Apellido, user.Email, user.Password, user.Rol]
-    );
+    const poolConnection = await pool;
+    await poolConnection
+      .request()
+      .input('Nombre', sql.VarChar, user.Nombre)
+      .input('Apellido', sql.VarChar, user.Apellido)
+      .input('Email', sql.VarChar, user.Email)
+      .input('Password', sql.VarChar, user.Password)
+      .input('Rol', sql.VarChar, user.Rol)
+      .execute('sp_CreateUser');
   } catch (error) {
     console.error('Error al ejecutar sp_CreateUser:', error);
     throw new Error('Error en la base de datos');
   }
-}
+};

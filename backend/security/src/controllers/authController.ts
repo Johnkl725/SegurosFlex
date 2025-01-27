@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { generateToken } from '../utils/jwt'; 
+//import { generateToken } from '../utils/jwt'; 
 import { findUserByEmail, createUser } from '../models/userModel';
 
 // Registro de usuario
@@ -36,12 +36,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
   
       // Generar token JWT para la sesión del usuario
-      const token = generateToken({ UsuarioID: user.UsuarioID, Rol: user.Rol });
+      //const token = generateToken({ UsuarioID: user.UsuarioID, Rol: user.Rol });
   
       // Responder con éxito y enviar el token junto con los datos del usuario
       res.status(200).json({
         message: 'Inicio de sesión exitoso',
-        token,
         user: {
           UsuarioID: user.UsuarioID,
           Nombre: user.Nombre,

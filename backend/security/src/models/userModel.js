@@ -14,13 +14,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUser = exports.findUserByEmail = void 0;
 const db_1 = __importDefault(require("../config/db"));
-// Función para llamar al procedimiento almacenado
+const mssql_1 = __importDefault(require("mssql"));
+// Función para llamar al procedimiento almacenado y buscar usuario por email
 const findUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const [rows] = yield db_1.default.query('CALL sp_FindUserByEmail(?)', [email]);
-        // En MySQL, los procedimientos almacenados devuelven un array de arrays, por lo que accedemos a `rows[0]`
-        if (rows.length > 0 && rows[0].length > 0) {
-            return rows[0][0]; // Retorna el primer usuario encontrado
+        const poolConnection = yield db_1.default;
+        const result = yield poolConnection
+            .request()
+            .input('Email', mssql_1.default.VarChar, email)
+            .execute('sp_FindUserByEmail');
+        if (result.recordset.length > 0) {
+            return result.recordset[0];
         }
         return null;
     }
@@ -30,9 +34,18 @@ const findUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.findUserByEmail = findUserByEmail;
+// Función para llamar al procedimiento almacenado y crear un usuario
 const createUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield db_1.default.query('CALL sp_CreateUser(?, ?, ?, ?, ?)', [user.Nombre, user.Apellido, user.Email, user.Password, user.Rol]);
+        const poolConnection = yield db_1.default;
+        yield poolConnection
+            .request()
+            .input('Nombre', mssql_1.default.VarChar, user.Nombre)
+            .input('Apellido', mssql_1.default.VarChar, user.Apellido)
+            .input('Email', mssql_1.default.VarChar, user.Email)
+            .input('Password', mssql_1.default.VarChar, user.Password)
+            .input('Rol', mssql_1.default.VarChar, user.Rol)
+            .execute('sp_CreateUser');
     }
     catch (error) {
         console.error('Error al ejecutar sp_CreateUser:', error);
