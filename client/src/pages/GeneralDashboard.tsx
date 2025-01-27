@@ -27,16 +27,16 @@ const GeneralDashboard = () => {
             </button>
           </div>
 
-          {/* Seguimiento de Siniestros */}
+          {/* Registro de Siniestros */}
           <div className="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col items-center">
             <FiClipboard className="text-green-400 text-6xl mb-4" />
-            <h2 className="text-2xl font-bold text-green-400">Seguimiento de Siniestros</h2>
+            <h2 className="text-2xl font-bold text-green-400">Registro de Siniestros</h2>
             <p className="text-gray-300 mt-2 text-center">
               Visualiza y consulta el estado de tus siniestros.
             </p>
-            <button className="mt-4 bg-green-600 hover:bg-green-700 px-5 py-2 rounded-lg text-white">
-              Consultar Siniestros
-            </button>
+            <a href="/registro-siniestro" className="mt-4 bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg text-white">
+              Registrar Siniestro
+            </a>
           </div>
 
           {/* Configuración de Cuenta */}

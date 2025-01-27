@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css"; // Importar estilos de Mapbox
+
+mapboxgl.accessToken = "pk.eyJ1IjoiZGFuaWVscHJ1ZWJhMjMiLCJhIjoiY200YnlpbGV5MDVqeTJ3b3ZsOXp0bXpmbiJ9.bh_ogcw3BioUBy--uuJ0LQ";
 
 const RegistroSiniestro = () => {
   const [form, setForm] = useState({
@@ -13,10 +17,69 @@ const RegistroSiniestro = () => {
     documentos: [],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
+
+  const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
+    const { lng, lat } = e.lngLat;
+
+    // Mover o crear marcador
+    if (markerRef.current) {
+      markerRef.current.setLngLat([lng, lat]);
+    } else {
+      markerRef.current = new mapboxgl.Marker()
+        .setLngLat([lng, lat])
+        .addTo(mapRef.current!);
+    }
+
+    // Realizar geocodificación inversa
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const address = data.address;
+        setForm((prev) => ({
+          ...prev,
+          ubicacion: data.display_name,
+          distrito: address.suburb || "",
+          provincia: address.city || "",
+          departamento: address.state || "",
+        }));
+      })
+      .catch((error) => {
+        console.error("Error al obtener la dirección:", error);
+        setForm((prev) => ({
+          ...prev,
+          ubicacion: `${lat}, ${lng}`,
+        }));
+      });
+  };
+
+  useEffect(() => {
+    if (mapRef.current) return; // Inicializar solo si el mapa no existe
+
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current!,
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [-77.0428, -12.0464], // Coordenadas iniciales (Lima, Perú)
+      zoom: 12,
+    });
+
+    map.on("load", () => {
+      map.on("click", handleMapClick); // Configuramos el evento de clic en el mapa
+    });
+
+    mapRef.current = map; // Guardamos la referencia al mapa
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +93,14 @@ const RegistroSiniestro = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-8 bg-gradient-to-br from-red-50 to-red-100 border-4 border-red-600 rounded-lg shadow-lg">
-      <h1 className="text-4xl font-bold text-red-700 text-center mb-8 tracking-wide uppercase">
-        Registrar Siniestro
-      </h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div className="max-w-7xl mx-auto mt-10 p-8 bg-gradient-to-br from-red-50 to-red-100 border-4 border-red-600 rounded-lg shadow-lg">
+    <h1 className="text-4xl font-bold text-red-700 text-center mb-8 tracking-wide uppercase">
+      Registrar Siniestro
+    </h1>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      {/* Columna 1: Formulario */}
+      <form onSubmit={handleSubmit} className="space-y-6 flex flex-col">
+        <div className="grid grid-cols-1 gap-4">
           <input
             type="text"
             name="tipoSiniestro"
@@ -60,7 +125,6 @@ const RegistroSiniestro = () => {
             value={form.departamento}
             onChange={handleChange}
             className="w-full px-4 py-3 border border-red-400 rounded-lg focus:ring focus:ring-red-300 focus:outline-none shadow-sm transition duration-300"
-            required
           />
           <input
             type="text"
@@ -69,7 +133,6 @@ const RegistroSiniestro = () => {
             value={form.distrito}
             onChange={handleChange}
             className="w-full px-4 py-3 border border-red-400 rounded-lg focus:ring focus:ring-red-300 focus:outline-none shadow-sm transition duration-300"
-            required
           />
           <input
             type="text"
@@ -78,7 +141,6 @@ const RegistroSiniestro = () => {
             value={form.provincia}
             onChange={handleChange}
             className="w-full px-4 py-3 border border-red-400 rounded-lg focus:ring focus:ring-red-300 focus:outline-none shadow-sm transition duration-300"
-            required
           />
           <input
             type="text"
@@ -87,7 +149,6 @@ const RegistroSiniestro = () => {
             value={form.ubicacion}
             onChange={handleChange}
             className="w-full px-4 py-3 border border-red-400 rounded-lg focus:ring focus:ring-red-300 focus:outline-none shadow-sm transition duration-300"
-            required
           />
         </div>
         <textarea
@@ -95,17 +156,24 @@ const RegistroSiniestro = () => {
           placeholder="Descripción"
           value={form.descripcion}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-red-400 rounded-lg focus:ring focus:ring-red-300 focus:outline-none shadow-sm transition duration-300"
+          className="w-full px-4 py-3 border border-red-400 rounded-lg focus:ring focus:ring-red-300 focus:outline-none shadow-sm transition duration-300 flex-grow"
           required
         ></textarea>
-      <button
-  type="submit"
-  className="w-full bg-red-500 text-red-700 font-bold px-6 py-3 rounded-lg hover:bg-red-600 hover:text-white focus:ring focus:ring-red-300 shadow-md transition duration-300"
->
+        <button
+          type="submit"
+          className="w-full bg-red-500 text-red-700 font-bold px-6 py-3 mt-4 rounded-lg hover:bg-red-600 hover:text-white focus:ring focus:ring-red-300 shadow-md transition duration-300"
+        >
           Registrar Siniestro
         </button>
       </form>
+  
+      {/* Columna 2: Mapa */}
+      <div className="w-full h-[480px] border border-red-400 rounded-lg">
+        <div ref={mapContainerRef} className="w-full h-full"></div>
+      </div>
     </div>
+  </div>
+  
   );
 };
 
