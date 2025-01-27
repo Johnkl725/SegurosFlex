@@ -211,3 +211,14 @@ BEGIN
     SET PolizaID = LAST_INSERT_ID();
 END$$
 DELIMITER ;
+
+
+CREATE USER 'microservice_security'@'localhost' IDENTIFIED BY 'secure_password';
+
+GRANT ALL PRIVILEGES ON SistemaFlexDB.* TO 'microservice_user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+SELECT user, host FROM mysql.user WHERE user = 'microservice_user';
+
+

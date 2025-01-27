@@ -5,19 +5,7 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import RegistroSiniestro from "./components/RegistroSiniestro";
 
-function App() {
-  return (
-    <Router>
-      {/* Rutas */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/registro-siniestro" element={<RegistroSiniestro />} />
-      </Routes>
-    </Router>
-  );
-}
-
-function Home() {
+const Home = () => {
   const [count, setCount] = useState(0);
   const navigate = useNavigate();
 
@@ -60,6 +48,18 @@ function Home() {
       </div>
     </div>
   );
-}
+};
+
+const App = () => {
+  return (
+    <Router>
+      {/* Rutas */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/registro-siniestro" element={<RegistroSiniestro />} />
+      </Routes>
+    </Router>
+  );
+};
 
 export default App;
